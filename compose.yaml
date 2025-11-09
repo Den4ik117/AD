@@ -1,29 +1,14 @@
 services:
   db:
-    image: postgres:latest
+    image: postgres:18
     environment:
       POSTGRES_USER: ad
       POSTGRES_PASSWORD: ad
       POSTGRES_DB: ad
     volumes:
-      - pg_data:/var/lib/postgresql/data
-    networks:
-      - ad_net
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      - ad-pg-data:/var/lib/postgresql
     ports:
-      - "5050:80"
-    depends_on:
-      - db
-    networks:
-      - ad_net
+      - "5432:5432"
 
 volumes:
-  pg_data:
-
-networks:
-  ad_net:
+  ad-pg-data:

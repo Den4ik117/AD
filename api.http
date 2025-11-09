@@ -1,0 +1,39 @@
+@baseUrl = http://127.0.0.1:8000
+@userId = b3b921dd-7cf7-41d4-ac93-2f06bad4ac43
+
+### List users (pagination defaults to 10 items per page)
+# @no-log
+GET {{baseUrl}}/users?count=10&page=1
+Accept: application/json
+
+### Create a new user
+# @no-log
+POST {{baseUrl}}/users
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "demo_user_{{$timestamp}}",
+  "email": "demo_user_{{$timestamp}}@example.com",
+  "description": "Created via api.http"
+}
+
+### Fetch a user by ID
+# @no-log
+GET {{baseUrl}}/users/{{userId}}
+Accept: application/json
+
+### Update an existing user
+# @no-log
+PUT {{baseUrl}}/users/{{userId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "description": "Updated via api.http"
+}
+
+### Delete a user
+# @no-log
+DELETE {{baseUrl}}/users/{{userId}}
+Accept: application/json

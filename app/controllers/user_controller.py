@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from typing import Annotated
 from uuid import UUID
 
 from litestar import Controller, delete, get, post, put
 from litestar.exceptions import NotFoundException
-from litestar.params import Parameter
+from litestar.params import Body, Parameter
 from litestar.status_codes import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.repositories import UserNotFoundError
@@ -45,10 +46,10 @@ class UserController(Controller):
     async def create_user(
         self,
         user_service: UserService,
-        user_data: UserCreate,
+        data: Annotated[UserCreate, Body()],
     ) -> UserResponse:
         """Create a new user."""
-        user = await user_service.create_user(user_data)
+        user = await user_service.create_user(data)
         return UserResponse.model_validate(user)
 
     @delete("/{user_id:uuid}", status_code=HTTP_204_NO_CONTENT)
@@ -68,11 +69,11 @@ class UserController(Controller):
         self,
         user_service: UserService,
         user_id: UUID,
-        user_data: UserUpdate,
+        data: UserUpdate,
     ) -> UserResponse:
         """Update a user."""
         try:
-            user = await user_service.update_user(user_id, user_data)
+            user = await user_service.update_user(user_id, data)
         except UserNotFoundError as exc:
             raise NotFoundException(detail=str(exc)) from exc
         return UserResponse.model_validate(user)

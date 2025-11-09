@@ -12,7 +12,7 @@ from app.repositories import UserRepository
 from app.services import UserService
 
 # Настройка базы данных
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./app.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://ad:ad@127.0.0.1:5432/ad")
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 async_session_factory = async_sessionmaker(
@@ -27,6 +27,8 @@ async def provide_db_session() -> AsyncIterator[AsyncSession]:
     async with async_session_factory() as session:
         try:
             yield session
+        except BaseException as e:
+            print(e)
         finally:
             await session.close()
 
