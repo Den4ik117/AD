@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
-from app.models import User, Address, Product, Order
+from app.models import User, Address, Product, Order, OrderItem
 
 engine = create_engine("sqlite:///test.db", echo=True)
 session_factory = sessionmaker(engine)
@@ -13,7 +13,8 @@ def simple_join_query():
             User.username,
             User.description,
             Product.name,
-            Order.quantity,
+            OrderItem.quantity,
+            OrderItem.unit_price,
             Order.total_price,
             Order.status,
             Address.street,
@@ -21,9 +22,11 @@ def simple_join_query():
         ).select_from(Order).join(
             Order.user
         ).join(
-            Order.product  
-        ).join(
             Order.address
+        ).join(
+            Order.items
+        ).join(
+            OrderItem.product
         ).order_by(
             User.username
         )
@@ -33,8 +36,8 @@ def simple_join_query():
         for row in results:
             print(f"{row.username}")
             print(f"{row.description}")
-            print(f"{row.name} x{row.quantity}")
-            print(f"{row.status}")
+            print(f"{row.name} x{row.quantity} @ {row.unit_price}")
+            print(f"{row.status} total: {row.total_price}")
             print(f"{row.street}, {row.city}")
            
 

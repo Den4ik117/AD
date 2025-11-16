@@ -17,4 +17,6 @@
 ## Запуск и установка
 
 1. Установить зависимости из `requirements.txt`
-2. Запустить приложение командой `python -m app.main`
+2. Запустить PostgreSQL в контейнере: `docker compose up -d`
+3. Применить миграции: `alembic upgrade head`
+4. Запустить приложение командой `python -m app.main`

@@ -53,10 +53,11 @@ class Product(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column()
     price: Mapped[float] = mapped_column(nullable=False)
+    stock_quantity: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.now, onupdate=datetime.now)
 
-    orders = relationship("Order", back_populates="product")
+    order_items = relationship("OrderItem", back_populates="product")
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -67,8 +68,6 @@ class Order(Base):
     )
     user_id: Mapped[UUID] = mapped_column(ForeignKey('users.id'), nullable=False)
     address_id: Mapped[UUID] = mapped_column(ForeignKey('addresses.id'), nullable=False)
-    product_id: Mapped[UUID] = mapped_column(ForeignKey('products.id'), nullable=False)
-    quantity: Mapped[int] = mapped_column(default=1)
     total_price: Mapped[float] = mapped_column(nullable=False)
     status: Mapped[str] = mapped_column(default='pending')  # pending, completed, cancelled
     
@@ -77,5 +76,23 @@ class Order(Base):
 
     user = relationship("User", back_populates="orders")
     address = relationship("Address", back_populates="orders")
-    product = relationship("Product", back_populates="orders")
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
 
+
+class OrderItem(Base):
+    __tablename__ = 'order_items'
+
+    id: Mapped[UUID] = mapped_column(
+        primary_key=True,
+        default=uuid4,
+    )
+    order_id: Mapped[UUID] = mapped_column(ForeignKey('orders.id'), nullable=False)
+    product_id: Mapped[UUID] = mapped_column(ForeignKey('products.id'), nullable=False)
+    quantity: Mapped[int] = mapped_column(default=1)
+    unit_price: Mapped[float] = mapped_column(nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.now, onupdate=datetime.now)
+
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product", back_populates="order_items")

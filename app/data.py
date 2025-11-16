@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
-from app.models import User, Address, Product, Order
+from app.models import User, Address, Product, Order, OrderItem
 
 connect_url = "sqlite:///test.db"
 engine = create_engine(connect_url, echo=True)
@@ -11,11 +11,36 @@ def add_products_and_orders():
     with session_factory() as session:
         
         products = [
-            Product(name="Молоко Простоквашино 2.5%", description="Пастеризованное молоко 1 л", price=89.90),
-            Product(name="Хлеб Бородинский", description="Ржаной хлеб 500 гр", price=65.50),
-            Product(name="Сыр Российский", description="Твердый сыр 200 гр", price=249.99),
-            Product(name="Яйца куриные C1", description="Яйца столовые 10 шт", price=119.90),
-            Product(name="Вода минеральная Боржоми", description="Лечебно-столовая вода 0,5 л", price=159.99)
+            Product(
+                name="Молоко Простоквашино 2.5%",
+                description="Пастеризованное молоко 1 л",
+                price=89.90,
+                stock_quantity=120,
+            ),
+            Product(
+                name="Хлеб Бородинский",
+                description="Ржаной хлеб 500 гр",
+                price=65.50,
+                stock_quantity=60,
+            ),
+            Product(
+                name="Сыр Российский",
+                description="Твердый сыр 200 гр",
+                price=249.99,
+                stock_quantity=40,
+            ),
+            Product(
+                name="Яйца куриные C1",
+                description="Яйца столовые 10 шт",
+                price=119.90,
+                stock_quantity=200,
+            ),
+            Product(
+                name="Вода минеральная Боржоми",
+                description="Лечебно-столовая вода 0,5 л",
+                price=159.99,
+                stock_quantity=80,
+            ),
         ]
         
         session.add_all(products)
@@ -24,47 +49,30 @@ def add_products_and_orders():
         users = session.scalars(select(User)).all()
         addresses = session.scalars(select(Address)).all()
         
-        orders = [
-            Order(
-                user_id=users[0].id,
-                address_id=addresses[0].id,
-                product_id=products[0].id,
-                quantity=1,
-                total_price=products[0].price,
-                status="completed"
-            ),
-            Order(
-                user_id=users[1].id,
-                address_id=addresses[1].id,
-                product_id=products[1].id,
-                quantity=2,
-                total_price=products[1].price * 2,
-                status="pending"
-            ),
-            Order(
-                user_id=users[2].id,
-                address_id=addresses[2].id,
-                product_id=products[2].id,
-                quantity=1,
-                total_price=products[2].price,
-                status="completed"
-            ),
-            Order(
-                user_id=users[3].id,
-                address_id=addresses[3].id,
-                product_id=products[3].id,
-                quantity=3,
-                total_price=products[3].price * 3,
-                status="pending"
-            ),
-            Order(
-                user_id=users[4].id,
-                address_id=addresses[4].id,
-                product_id=products[4].id,
-                quantity=1,
-                total_price=products[4].price,
-                status="completed"
+        def build_order(user_idx: int, address_idx: int, product_payload: list[tuple[int, int]], status: str) -> Order:
+            items = [
+                OrderItem(
+                    product_id=products[product_idx].id,
+                    quantity=qty,
+                    unit_price=products[product_idx].price,
+                )
+                for product_idx, qty in product_payload
+            ]
+            total_price = sum(item.quantity * item.unit_price for item in items)
+            return Order(
+                user_id=users[user_idx].id,
+                address_id=addresses[address_idx].id,
+                status=status,
+                total_price=total_price,
+                items=items,
             )
+
+        orders = [
+            build_order(0, 0, [(0, 1), (1, 2)], "completed"),
+            build_order(1, 1, [(2, 1)], "pending"),
+            build_order(2, 2, [(2, 1), (3, 3)], "completed"),
+            build_order(3, 3, [(3, 2), (4, 1)], "pending"),
+            build_order(4, 4, [(0, 1), (4, 2)], "completed"),
         ]
         
         session.add_all(orders)
