@@ -20,3 +20,12 @@
 2. Запустить PostgreSQL в контейнере: `docker compose up -d`
 3. Применить миграции: `alembic upgrade head`
 4. Запустить приложение командой `python -m app.main`
+
+## Запуск тестов
+
+- Запуск всех тестов: `pytest`
+- Запуск только unit-тестов: `pytest tests/test_models/ tests/test_repositories/ tests/test_services/`
+- Запуск только API-тестов: `pytest tests/test_routes/`
+- Запуск тестов с покрытием кода: `pytest --cov=app --cov-report=html`
+- Параллельный запуск тестов: `pytest -n auto`
+

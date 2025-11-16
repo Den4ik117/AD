@@ -73,9 +73,10 @@ class OrderRepository:
 
         order.total_price = sum(item.quantity * item.unit_price for item in order.items)
         self._session.add(order)
+        await self._session.flush()
+        order_id = order.id
         await self._session.commit()
-        await self._session.refresh(order)
-        return order
+        return await self.get_or_raise(order_id)
 
     async def update(
         self,
@@ -98,12 +99,11 @@ class OrderRepository:
                         quantity=payload["quantity"],
                         unit_price=payload["unit_price"],
                     )
-                )
+            )
             order.total_price = sum(item.quantity * item.unit_price for item in order.items)
 
         await self._session.commit()
-        await self._session.refresh(order)
-        return order
+        return await self.get_or_raise(order.id)
 
     async def delete(self, order_id: UUID) -> None:
         order = await self.get_or_raise(order_id)
