@@ -21,7 +21,9 @@ def user_service(user_repository_mock: AsyncMock) -> UserService:
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_id_calls_repository(user_service: UserService, user_repository_mock: AsyncMock):
+async def test_get_user_by_id_calls_repository(
+    user_service: UserService, user_repository_mock: AsyncMock
+):
     user_id = uuid4()
     user_repository_mock.get_by_id.return_value = {"id": user_id}
 
@@ -32,7 +34,9 @@ async def test_get_user_by_id_calls_repository(user_service: UserService, user_r
 
 
 @pytest.mark.asyncio
-async def test_get_users_returns_pagination(user_service: UserService, user_repository_mock: AsyncMock):
+async def test_get_users_returns_pagination(
+    user_service: UserService, user_repository_mock: AsyncMock
+):
     user_repository_mock.get_by_filter.return_value = (["user1"], 1)
 
     items, total = await user_service.get_users(count=5, page=2)
@@ -43,8 +47,12 @@ async def test_get_users_returns_pagination(user_service: UserService, user_repo
 
 
 @pytest.mark.asyncio
-async def test_create_user_delegates_to_repository(user_service: UserService, user_repository_mock: AsyncMock):
-    payload = UserCreate(username="tester", email="tester@example.com", description=None)
+async def test_create_user_delegates_to_repository(
+    user_service: UserService, user_repository_mock: AsyncMock
+):
+    payload = UserCreate(
+        username="tester", email="tester@example.com", description=None
+    )
     user_repository_mock.create.return_value = {"username": "tester"}
 
     result = await user_service.create_user(payload)
@@ -54,7 +62,9 @@ async def test_create_user_delegates_to_repository(user_service: UserService, us
 
 
 @pytest.mark.asyncio
-async def test_update_user_delegates(user_service: UserService, user_repository_mock: AsyncMock):
+async def test_update_user_delegates(
+    user_service: UserService, user_repository_mock: AsyncMock
+):
     user_id = uuid4()
     payload = UserUpdate(description="new")
     user_repository_mock.update.return_value = {"id": user_id, "description": "new"}
@@ -66,7 +76,9 @@ async def test_update_user_delegates(user_service: UserService, user_repository_
 
 
 @pytest.mark.asyncio
-async def test_delete_user_calls_repository(user_service: UserService, user_repository_mock: AsyncMock):
+async def test_delete_user_calls_repository(
+    user_service: UserService, user_repository_mock: AsyncMock
+):
     user_id = uuid4()
 
     await user_service.delete_user(user_id)

@@ -25,7 +25,9 @@ class UserService:
         **filters: Any,
     ) -> tuple[list[User], int]:
         """Return users and total count."""
-        return await self._user_repository.get_by_filter(count=count, page=page, **filters)
+        return await self._user_repository.get_by_filter(
+            count=count, page=page, **filters
+        )
 
     async def create_user(self, user_data: UserCreate) -> User:
         """Create a new user."""

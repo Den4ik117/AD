@@ -5,7 +5,6 @@ import pytest
 from app.models import Address, User
 from app.repositories import OrderNotFoundError, OrderRepository, ProductRepository
 
-
 pytestmark = pytest.mark.asyncio
 
 
@@ -39,8 +38,12 @@ async def test_order_repository_handles_multi_item_orders(async_session):
     product_repo = ProductRepository(async_session)
 
     user, address = await _create_user_and_address(async_session)
-    milk = await product_repo.create(name="Молоко", description="1 л", price=80.0, stock_quantity=20)
-    bread = await product_repo.create(name="Хлеб", description="500 г", price=50.0, stock_quantity=30)
+    milk = await product_repo.create(
+        name="Молоко", description="1 л", price=80.0, stock_quantity=20
+    )
+    bread = await product_repo.create(
+        name="Хлеб", description="500 г", price=50.0, stock_quantity=30
+    )
 
     created = await order_repo.create(
         user_id=user.id,
@@ -56,13 +59,17 @@ async def test_order_repository_handles_multi_item_orders(async_session):
 
     fetched = await order_repo.get_by_id(created.id)
     assert fetched is not None
-    assert sorted(item.product_id for item in fetched.items) == sorted([milk.id, bread.id])
+    assert sorted(item.product_id for item in fetched.items) == sorted(
+        [milk.id, bread.id]
+    )
 
     orders, total = await order_repo.get_by_filter(count=5, page=1)
     assert total == 1
     assert orders[0].id == created.id
 
-    cheese = await product_repo.create(name="Сыр", description="200 г", price=210.0, stock_quantity=15)
+    cheese = await product_repo.create(
+        name="Сыр", description="200 г", price=210.0, stock_quantity=15
+    )
     updated = await order_repo.update(
         created.id,
         status="completed",

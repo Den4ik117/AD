@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import AsyncIterator
 from pathlib import Path
-import sys
 
 import pytest
 import pytest_asyncio
@@ -10,8 +10,13 @@ from litestar import Litestar
 from litestar.di import Provide
 from litestar.testing import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -55,13 +60,17 @@ async def async_engine(tmp_path) -> AsyncEngine:
 
 
 @pytest.fixture(scope="function")
-def async_session_factory(async_engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+def async_session_factory(
+    async_engine: AsyncEngine,
+) -> async_sessionmaker[AsyncSession]:
     """Factory yielding AsyncSession instances."""
     return async_sessionmaker(async_engine, expire_on_commit=False)
 
 
 @pytest_asyncio.fixture(scope="function")
-async def async_session(async_session_factory: async_sessionmaker[AsyncSession]) -> AsyncSession:
+async def async_session(
+    async_session_factory: async_sessionmaker[AsyncSession],
+) -> AsyncSession:
     """Provide a transactional AsyncSession for tests."""
     async with async_session_factory() as session:
         yield session

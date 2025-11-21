@@ -9,6 +9,16 @@ services:
       - ad-pg-data:/var/lib/postgresql
     ports:
       - "5432:5432"
+  web:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://ad:ad@db:5432/ad
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
 
 volumes:
   ad-pg-data:

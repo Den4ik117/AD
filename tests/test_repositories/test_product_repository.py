@@ -4,7 +4,6 @@ import pytest
 
 from app.repositories import ProductNotFoundError, ProductRepository
 
-
 pytestmark = pytest.mark.asyncio
 
 

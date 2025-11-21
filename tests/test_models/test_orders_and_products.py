@@ -4,7 +4,11 @@ from app.models import Address, Order, OrderItem, Product, User
 
 
 def test_order_accepts_multiple_products(db_session):
-    user = User(username="order_user", email="order@example.com", description="Любит заказывать много товаров")
+    user = User(
+        username="order_user",
+        email="order@example.com",
+        description="Любит заказывать много товаров",
+    )
     db_session.add(user)
     db_session.flush()
 

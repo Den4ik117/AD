@@ -29,16 +29,29 @@ class ProductRepository:
         **filters: Any,
     ) -> tuple[list[Product], int]:
         query = self._apply_filters(select(Product), filters)
-        total_query = self._apply_filters(select(func.count()).select_from(Product), filters)
+        total_query = self._apply_filters(
+            select(func.count()).select_from(Product), filters
+        )
 
-        limited_query = query.order_by(Product.created_at.desc()).limit(count).offset((page - 1) * count)
+        limited_query = (
+            query.order_by(Product.created_at.desc())
+            .limit(count)
+            .offset((page - 1) * count)
+        )
         result = await self._session.execute(limited_query)
         products = result.scalars().all()
 
         total = await self._session.scalar(total_query)
         return products, int(total or 0)
 
-    async def create(self, *, name: str, price: float, description: str | None = None, stock_quantity: int = 0) -> Product:
+    async def create(
+        self,
+        *,
+        name: str,
+        price: float,
+        description: str | None = None,
+        stock_quantity: int = 0,
+    ) -> Product:
         product = Product(
             name=name,
             price=price,

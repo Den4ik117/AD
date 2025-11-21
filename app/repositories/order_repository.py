@@ -22,9 +22,7 @@ class OrderRepository:
 
     async def get_by_id(self, order_id: UUID) -> Order | None:
         stmt = (
-            select(Order)
-            .options(selectinload(Order.items))
-            .where(Order.id == order_id)
+            select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
         )
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
@@ -35,10 +33,18 @@ class OrderRepository:
         page: int = 1,
         **filters: Any,
     ) -> tuple[list[Order], int]:
-        query = self._apply_filters(select(Order), filters).options(selectinload(Order.items))
-        total_query = self._apply_filters(select(func.count()).select_from(Order), filters)
+        query = self._apply_filters(select(Order), filters).options(
+            selectinload(Order.items)
+        )
+        total_query = self._apply_filters(
+            select(func.count()).select_from(Order), filters
+        )
 
-        limited_query = query.order_by(Order.created_at.desc()).limit(count).offset((page - 1) * count)
+        limited_query = (
+            query.order_by(Order.created_at.desc())
+            .limit(count)
+            .offset((page - 1) * count)
+        )
         result = await self._session.execute(limited_query)
         orders = result.scalars().all()
 
@@ -99,8 +105,10 @@ class OrderRepository:
                         quantity=payload["quantity"],
                         unit_price=payload["unit_price"],
                     )
+                )
+            order.total_price = sum(
+                item.quantity * item.unit_price for item in order.items
             )
-            order.total_price = sum(item.quantity * item.unit_price for item in order.items)
 
         await self._session.commit()
         return await self.get_or_raise(order.id)

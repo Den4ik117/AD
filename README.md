@@ -16,7 +16,7 @@
 
 ## Запуск и установка
 
-1. Установить зависимости из `requirements.txt`
+1. Установить зависимости: `pip install -r requirements.txt`
 2. Запустить PostgreSQL в контейнере: `docker compose up -d`
 3. Применить миграции: `alembic upgrade head`
 4. Запустить приложение командой `python -m app.main`
@@ -29,3 +29,17 @@
 - Запуск тестов с покрытием кода: `pytest --cov=app --cov-report=html`
 - Параллельный запуск тестов: `pytest -n auto`
 
+## Форматирование и линтинг
+
+1. Установите зависимости из `requirements.txt`, чтобы были доступны `black`, `isort`, `pylint` и `pre-commit`.
+2. Выполните `pre-commit install`, чтобы включить проверки перед коммитами.
+3. Локально прогоните всё сразу командой `pre-commit run --all-files`. Скрипт последовательно вызовет `black` и `isort` для каталогов `app` и `tests`, а затем `pylint` для боевого кода.
+
+Все параметры форматеров и линтера заданы в `pyproject.toml` и `.pylintrc`. При необходимости обновите игнорируемые каталоги или список отключённых правил в соответствии с задачами.
+
+## Сборка и запуск в Docker
+
+1. Соберите образ приложения: `docker compose build web`.
+2. Поднимите сервисы вместе с PostgreSQL: `docker compose up --build`.
+
+`Dockerfile` разворачивает Python 3.13, устанавливает зависимости и использует `entrypoint.sh`, который ожидает `db`, применяет `alembic upgrade head` и затем запускает `uvicorn app.main:app --host 0.0.0.0 --port 8000`. Ожидаемая точка входа доступна на `http://127.0.0.1:8000`.

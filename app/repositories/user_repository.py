@@ -32,9 +32,15 @@ class UserRepository:
     ) -> tuple[list[User], int]:
         """Return paginated users matching the provided filters along with total count."""
         query = self._apply_filters(select(User), filters)
-        total_query = self._apply_filters(select(func.count()).select_from(User), filters)
+        total_query = self._apply_filters(
+            select(func.count()).select_from(User), filters
+        )
 
-        limited_query = query.order_by(User.created_at.desc()).limit(count).offset((page - 1) * count)
+        limited_query = (
+            query.order_by(User.created_at.desc())
+            .limit(count)
+            .offset((page - 1) * count)
+        )
         result = await self._session.execute(limited_query)
         users = result.scalars().all()
 

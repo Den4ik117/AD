@@ -27,8 +27,8 @@ async def provide_db_session() -> AsyncIterator[AsyncSession]:
     async with async_session_factory() as session:
         try:
             yield session
-        except BaseException as e:
-            print(e)
+        # except BaseException as e:
+        #     print(e)
         finally:
             await session.close()
 
