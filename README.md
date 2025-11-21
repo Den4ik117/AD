@@ -42,4 +42,3 @@
 1. Соберите образ приложения: `docker compose build web`.
 2. Поднимите сервисы вместе с PostgreSQL: `docker compose up --build`.
 
-`Dockerfile` разворачивает Python 3.13, устанавливает зависимости и использует `entrypoint.sh`, который ожидает `db`, применяет `alembic upgrade head` и затем запускает `uvicorn app.main:app --host 0.0.0.0 --port 8000`. Ожидаемая точка входа доступна на `http://127.0.0.1:8000`.
