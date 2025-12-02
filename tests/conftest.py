@@ -22,10 +22,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.controllers import UserController
+from app.controllers import OrderController, ProductController, UserController
 from app.models import Base
-from app.repositories import UserRepository
-from app.services import UserService
+from app.repositories import (
+    AddressRepository,
+    OrderRepository,
+    ProductRepository,
+    UserRepository,
+)
+from app.services import OrderService, ProductService, UserService
 
 
 @pytest.fixture(scope="function")
@@ -88,15 +93,51 @@ def api_client(async_session_factory: async_sessionmaker[AsyncSession]) -> TestC
     async def provide_user_repository(db_session: AsyncSession) -> UserRepository:
         return UserRepository(db_session)
 
+    async def provide_product_repository(
+        db_session: AsyncSession,
+    ) -> ProductRepository:
+        return ProductRepository(db_session)
+
+    async def provide_order_repository(db_session: AsyncSession) -> OrderRepository:
+        return OrderRepository(db_session)
+
+    async def provide_address_repository(
+        db_session: AsyncSession,
+    ) -> AddressRepository:
+        return AddressRepository(db_session)
+
     async def provide_user_service(user_repository: UserRepository) -> UserService:
         return UserService(user_repository)
 
+    async def provide_product_service(
+        product_repository: ProductRepository,
+    ) -> ProductService:
+        return ProductService(product_repository)
+
+    async def provide_order_service(
+        order_repository: OrderRepository,
+        product_repository: ProductRepository,
+        user_repository: UserRepository,
+        address_repository: AddressRepository,
+    ) -> OrderService:
+        return OrderService(
+            order_repository,
+            product_repository,
+            user_repository,
+            address_repository,
+        )
+
     app = Litestar(
-        route_handlers=[UserController],
+        route_handlers=[UserController, ProductController, OrderController],
         dependencies={
             "db_session": Provide(provide_db_session),
             "user_repository": Provide(provide_user_repository),
+            "product_repository": Provide(provide_product_repository),
+            "order_repository": Provide(provide_order_repository),
+            "address_repository": Provide(provide_address_repository),
             "user_service": Provide(provide_user_service),
+            "product_service": Provide(provide_product_service),
+            "order_service": Provide(provide_order_service),
         },
     )
 

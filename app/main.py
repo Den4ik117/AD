@@ -1,36 +1,26 @@
 from __future__ import annotations
 
-import os
 from collections.abc import AsyncIterator
 
 from litestar import Litestar
 from litestar.di import Provide
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.controllers import UserController
-from app.repositories import UserRepository
-from app.services import UserService
-
-# Настройка базы данных
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://ad:ad@127.0.0.1:5432/ad")
-
-engine = create_async_engine(DATABASE_URL, echo=True)
-async_session_factory = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
+from app.controllers import OrderController, ProductController, UserController
+from app.db import get_async_db_session
+from app.repositories import (
+    AddressRepository,
+    OrderRepository,
+    ProductRepository,
+    UserRepository,
 )
+from app.services import OrderService, ProductService, UserService
 
 
 async def provide_db_session() -> AsyncIterator[AsyncSession]:
     """Провайдер сессии базы данных."""
-    async with async_session_factory() as session:
-        try:
-            yield session
-        # except BaseException as e:
-        #     print(e)
-        finally:
-            await session.close()
+    async for session in get_async_db_session():
+        yield session
 
 
 async def provide_user_repository(db_session: AsyncSession) -> UserRepository:
@@ -38,17 +28,59 @@ async def provide_user_repository(db_session: AsyncSession) -> UserRepository:
     return UserRepository(db_session)
 
 
+async def provide_product_repository(db_session: AsyncSession) -> ProductRepository:
+    """Провайдер репозитория продуктов."""
+    return ProductRepository(db_session)
+
+
+async def provide_order_repository(db_session: AsyncSession) -> OrderRepository:
+    """Провайдер репозитория заказов."""
+    return OrderRepository(db_session)
+
+
+async def provide_address_repository(db_session: AsyncSession) -> AddressRepository:
+    """Провайдер репозитория адресов."""
+    return AddressRepository(db_session)
+
+
 async def provide_user_service(user_repository: UserRepository) -> UserService:
     """Провайдер сервиса пользователей."""
     return UserService(user_repository)
 
 
+async def provide_product_service(
+    product_repository: ProductRepository,
+) -> ProductService:
+    """Провайдер сервиса продуктов."""
+    return ProductService(product_repository)
+
+
+async def provide_order_service(
+    order_repository: OrderRepository,
+    product_repository: ProductRepository,
+    user_repository: UserRepository,
+    address_repository: AddressRepository,
+) -> OrderService:
+    """Провайдер сервиса заказов."""
+    return OrderService(
+        order_repository,
+        product_repository,
+        user_repository,
+        address_repository,
+    )
+
+
 app = Litestar(
-    route_handlers=[UserController],
+    route_handlers=[UserController, ProductController, OrderController],
     dependencies={
         "db_session": Provide(provide_db_session),
         "user_repository": Provide(provide_user_repository),
+        "product_repository": Provide(provide_product_repository),
+        "order_repository": Provide(provide_order_repository),
+        "address_repository": Provide(provide_address_repository),
         "user_service": Provide(provide_user_service),
+        "product_service": Provide(provide_product_service),
+        "order_service": Provide(provide_order_service),
     },
 )
 

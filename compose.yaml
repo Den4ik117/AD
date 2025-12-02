@@ -9,12 +9,22 @@ services:
       - ad-pg-data:/var/lib/postgresql
     ports:
       - "5432:5432"
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_VHOST=local
+    volumes:
+      - rabbitmq_data:/data
   web:
     build: .
     environment:
       DATABASE_URL: postgresql+asyncpg://ad:ad@db:5432/ad
       DB_HOST: db
       DB_PORT: "5432"
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/local
     ports:
       - "8000:8000"
     depends_on:
@@ -22,3 +32,4 @@ services:
 
 volumes:
   ad-pg-data:
+  rabbitmq_data:
