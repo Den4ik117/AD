@@ -15,6 +15,7 @@
 3. [Ссылка на третью лабораторную работу](https://docs.google.com/document/d/1M0DBQrG4NEUtzN714a1_N_Rh_KVSZIhnR8QxQiCZdgg/edit?usp=sharing)
 4. [Ссылка на четвёртую лабораторную работу](https://docs.google.com/document/d/15FRfiUYdONo2iLJPyB7hiq7Hmc_yTFR37AYn9WzB61Y/edit?usp=sharing)
 5. [Ссылка на пятую лабораторную работу](https://docs.google.com/document/d/1pLNgx7PPAwTO5Ul7wJ3QHNGokp7VCOk1nXbL3cIabX4/edit?usp=sharing)
+6. [Ссылка на шестую лабораторную работу](https://docs.google.com/document/d/1N7mADRd65VUpP0xNYjcJcleseNyprJZixjqY6qKzl24/edit?usp=sharing)
 
 ## Запуск и установка
 
