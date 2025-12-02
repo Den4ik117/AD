@@ -26,7 +26,7 @@ broker = RabbitBroker(RABBIT_URL)
 app = FastStream(broker)
 
 
-@broker.subscriber("product", parser="json")
+@broker.subscriber("product")
 async def subscribe_product(message: ProductMessage) -> None:
     async with async_session_factory() as session:
         service = ProductService(ProductRepository(session))
@@ -44,7 +44,7 @@ async def subscribe_product(message: ProductMessage) -> None:
         )
 
 
-@broker.subscriber("order", parser="json")
+@broker.subscriber("order")
 async def subscribe_order(message: OrderMessage) -> None:
     async with async_session_factory() as session:
         service = OrderService(

@@ -36,6 +36,17 @@ class ProductService:
         if message.action == "create":
             assert message.name is not None
             assert message.price is not None
+
+            existing = await self._product_repository.get_by_name(message.name)
+            if existing:
+                data = ProductUpdate(
+                    name=message.name,
+                    description=message.description,
+                    price=message.price,
+                    stock_quantity=message.stock_quantity,
+                )
+                return await self.update_product(existing.id, data)
+
             payload = ProductCreate(
                 name=message.name,
                 description=message.description,

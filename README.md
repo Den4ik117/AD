@@ -44,3 +44,10 @@
 1. Соберите образ приложения: `docker compose build web`.
 2. Поднимите сервисы вместе с PostgreSQL: `docker compose up --build`.
 
+## Запуск проекта для задания с RabbitMQ
+
+1. Установить зависимости: `pip install -r requirements.txt`
+2. Запустить контейнеры: `docker compose up -d`
+3. Запустить реализацию `python -m app.rabbit_app`
+4. Опубликовать несколько сообщений: `python producer.py`
+

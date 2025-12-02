@@ -10,8 +10,8 @@ def send_messages() -> None:
         pika.ConnectionParameters(host="localhost", port=5672, virtual_host="local")
     )
     channel = connection.channel()
-    channel.queue_declare(queue="product", durable=True)
-    channel.queue_declare(queue="order", durable=True)
+    channel.queue_declare(queue="product", durable=False)
+    channel.queue_declare(queue="order", durable=False)
 
     products = [
         {

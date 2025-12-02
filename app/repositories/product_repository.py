@@ -20,9 +20,13 @@ class ProductRepository:
         self._session = session
 
     async def get_by_name(self, name: str) -> Product | None:
-        stmt = select(Product).where(Product.name == name)
+        stmt = (
+            select(Product)
+            .where(Product.name == name)
+            .order_by(Product.created_at.desc())
+        )
         result = await self._session.execute(stmt)
-        return result.scalar_one_or_none()
+        return result.scalars().first()
 
     async def get_by_id(self, product_id: UUID) -> Product | None:
         return await self._session.get(Product, product_id)
