@@ -25,11 +25,20 @@ services:
       DB_HOST: db
       DB_PORT: "5432"
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/local
+      REDIS_URL: redis://redis:6379/0
     ports:
       - "8000:8000"
     depends_on:
       - db
+      - redis
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
 
 volumes:
   ad-pg-data:
   rabbitmq_data:
+  redis-data:

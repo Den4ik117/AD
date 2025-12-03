@@ -90,6 +90,24 @@ def api_client(async_session_factory: async_sessionmaker[AsyncSession]) -> TestC
         async with async_session_factory() as session:
             yield session
 
+    class FakeRedis:
+        def __init__(self) -> None:
+            self.storage: dict[str, str] = {}
+
+        async def get(self, key: str) -> str | None:
+            return self.storage.get(key)
+
+        async def setex(self, key: str, _: int, value: str) -> bool:
+            self.storage[key] = value
+            return True
+
+        async def delete(self, key: str) -> int:
+            return 1 if self.storage.pop(key, None) is not None else 0
+
+    async def provide_redis_client() -> AsyncIterator[FakeRedis]:
+        client = FakeRedis()
+        yield client
+
     async def provide_user_repository(db_session: AsyncSession) -> UserRepository:
         return UserRepository(db_session)
 
@@ -106,13 +124,16 @@ def api_client(async_session_factory: async_sessionmaker[AsyncSession]) -> TestC
     ) -> AddressRepository:
         return AddressRepository(db_session)
 
-    async def provide_user_service(user_repository: UserRepository) -> UserService:
-        return UserService(user_repository)
+    async def provide_user_service(
+        user_repository: UserRepository, redis_client: FakeRedis
+    ) -> UserService:
+        return UserService(user_repository, redis_client)
 
     async def provide_product_service(
         product_repository: ProductRepository,
+        redis_client: FakeRedis,
     ) -> ProductService:
-        return ProductService(product_repository)
+        return ProductService(product_repository, redis_client)
 
     async def provide_order_service(
         order_repository: OrderRepository,
@@ -131,6 +152,7 @@ def api_client(async_session_factory: async_sessionmaker[AsyncSession]) -> TestC
         route_handlers=[UserController, ProductController, OrderController],
         dependencies={
             "db_session": Provide(provide_db_session),
+            "redis_client": Provide(provide_redis_client),
             "user_repository": Provide(provide_user_repository),
             "product_repository": Provide(provide_product_repository),
             "order_repository": Provide(provide_order_repository),
