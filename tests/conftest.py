@@ -33,6 +33,23 @@ from app.repositories import (
 from app.services import OrderService, ProductService, UserService
 
 
+class FakeRedis:
+    """Lightweight in-memory Redis substitute for tests."""
+
+    def __init__(self) -> None:
+        self.storage: dict[str, str] = {}
+
+    async def get(self, key: str) -> str | None:
+        return self.storage.get(key)
+
+    async def setex(self, key: str, _: int, value: str) -> bool:
+        self.storage[key] = value
+        return True
+
+    async def delete(self, key: str) -> int:
+        return 1 if self.storage.pop(key, None) is not None else 0
+
+
 @pytest.fixture(scope="function")
 def db_session(tmp_path) -> Session:
     """Provide an isolated synchronous SQLite session bound to the app models."""
@@ -89,20 +106,6 @@ def api_client(async_session_factory: async_sessionmaker[AsyncSession]) -> TestC
     async def provide_db_session() -> AsyncIterator[AsyncSession]:
         async with async_session_factory() as session:
             yield session
-
-    class FakeRedis:
-        def __init__(self) -> None:
-            self.storage: dict[str, str] = {}
-
-        async def get(self, key: str) -> str | None:
-            return self.storage.get(key)
-
-        async def setex(self, key: str, _: int, value: str) -> bool:
-            self.storage[key] = value
-            return True
-
-        async def delete(self, key: str) -> int:
-            return 1 if self.storage.pop(key, None) is not None else 0
 
     async def provide_redis_client() -> AsyncIterator[FakeRedis]:
         client = FakeRedis()
