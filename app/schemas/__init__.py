@@ -18,6 +18,7 @@ from .product import (
     ProductResponse,
     ProductUpdate,
 )
+from .report import OrderReportItem, OrderReportResponse
 from .user import UserCreate, UserListResponse, UserResponse, UserUpdate
 
 __all__ = [
@@ -39,4 +40,6 @@ __all__ = [
     "OrderItemPayload",
     "OrderAddressPayload",
     "OrderUserPayload",
+    "OrderReportItem",
+    "OrderReportResponse",
 ]

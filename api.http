@@ -37,3 +37,8 @@ Accept: application/json
 # @no-log
 DELETE {{baseUrl}}/users/{{userId}}
 Accept: application/json
+
+### Fetch order report for a specific date
+# @no-log
+GET {{baseUrl}}/report?report_at=2025-10-27
+Accept: application/json

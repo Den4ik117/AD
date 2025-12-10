@@ -17,6 +17,7 @@
 5. [Ссылка на пятую лабораторную работу](https://docs.google.com/document/d/1pLNgx7PPAwTO5Ul7wJ3QHNGokp7VCOk1nXbL3cIabX4/edit?usp=sharing)
 6. [Ссылка на шестую лабораторную работу](https://docs.google.com/document/d/1N7mADRd65VUpP0xNYjcJcleseNyprJZixjqY6qKzl24/edit?usp=sharing)
 7. [Ссылка на седьмую лабораторную работу](https://docs.google.com/document/d/1o55TEAYlXIn4Z6zaCQFFrFNxoSs2UsWKqUZxBCl2SeY/edit?usp=sharing)
+7. [Ссылка на восьмую лабораторную работу](https://docs.google.com/document/d/1oiNIAF_8Lu_zlf777gAiBebAYTCgzhaZtdegmEASJiw/edit?usp=sharing)
 
 ## Запуск и установка
 
@@ -53,3 +54,12 @@
 3. Запустить реализацию `python -m app.rabbit_app`
 4. Опубликовать несколько сообщений: `python producer.py`
 
+## Проверка отчётов и планировщика
+
+1. Поднять инфраструктуру: `docker compose up -d` 
+2. Установить зависимости и применить миграции: `pip install -r requirements.txt` и `alembic upgrade head`
+3. Запустить обработчик очередей (создаёт товары и заказы из очереди): `python -m app.rabbit_app`
+4. Опубликовать тестовые данные: `python producer.py` (создаст товары/заказы с сегодняшней датой)
+5. Запустить TaskIQ worker для брокера: `taskiq worker app.scheduler:broker`
+6. В отдельном терминале запустить планировщик: `taskiq scheduler app.scheduler:scheduler --skip-first-run`
+7. Получить отчёт за нужный день: `curl "http://127.0.0.1:8000/report?report_at=2025-12-10"` или выполнить запрос из блока `/report` в `api.http`.

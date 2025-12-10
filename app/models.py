@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import Date, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -95,6 +95,7 @@ class Order(Base):
     items = relationship(
         "OrderItem", back_populates="order", cascade="all, delete-orphan"
     )
+    reports = relationship("OrderReport", back_populates="order")
 
 
 class OrderItem(Base):
@@ -116,3 +117,13 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product", back_populates="order_items")
+
+
+class OrderReport(Base):
+    __tablename__ = "order_reports"
+
+    report_at: Mapped[date] = mapped_column(Date, primary_key=True)
+    order_id: Mapped[UUID] = mapped_column(ForeignKey("orders.id"), primary_key=True)
+    count_product: Mapped[int] = mapped_column(nullable=False)
+
+    order = relationship("Order", back_populates="reports")

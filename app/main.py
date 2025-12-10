@@ -8,15 +8,26 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache import get_redis_client
-from app.controllers import OrderController, ProductController, UserController
+from app.controllers import (
+    OrderController,
+    ProductController,
+    ReportController,
+    UserController,
+)
 from app.db import get_async_db_session
 from app.repositories import (
     AddressRepository,
+    OrderReportRepository,
     OrderRepository,
     ProductRepository,
     UserRepository,
 )
-from app.services import OrderService, ProductService, UserService
+from app.services import (
+    OrderReportService,
+    OrderService,
+    ProductService,
+    UserService,
+)
 
 
 async def provide_db_session() -> AsyncIterator[AsyncSession]:
@@ -51,6 +62,13 @@ async def provide_address_repository(db_session: AsyncSession) -> AddressReposit
     return AddressRepository(db_session)
 
 
+async def provide_order_report_repository(
+    db_session: AsyncSession,
+) -> OrderReportRepository:
+    """Провайдер репозитория отчётов по заказам."""
+    return OrderReportRepository(db_session)
+
+
 async def provide_user_service(
     user_repository: UserRepository, redis_client: Redis
 ) -> UserService:
@@ -80,8 +98,20 @@ async def provide_order_service(
     )
 
 
+async def provide_order_report_service(
+    order_report_repository: OrderReportRepository,
+) -> OrderReportService:
+    """Провайдер сервиса отчётов по заказам."""
+    return OrderReportService(order_report_repository)
+
+
 app = Litestar(
-    route_handlers=[UserController, ProductController, OrderController],
+    route_handlers=[
+        UserController,
+        ProductController,
+        OrderController,
+        ReportController,
+    ],
     dependencies={
         "db_session": Provide(provide_db_session),
         "redis_client": Provide(provide_redis_client),
@@ -92,6 +122,8 @@ app = Litestar(
         "user_service": Provide(provide_user_service),
         "product_service": Provide(provide_product_service),
         "order_service": Provide(provide_order_service),
+        "order_report_repository": Provide(provide_order_report_repository),
+        "order_report_service": Provide(provide_order_report_service),
     },
 )
 
